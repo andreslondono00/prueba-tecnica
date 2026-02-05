@@ -1,58 +1,66 @@
--- 1. Crear base de datos
-CREATE DATABASE IF NOT EXISTS support_tickets;
+-- Script de configuración inicial
+DROP DATABASE IF EXISTS support_tickets;
+CREATE DATABASE support_tickets;
 USE support_tickets;
 
--- 2. Crear tabla clients
+-- Tabla clients
 CREATE TABLE clients (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 3. Crear tabla agents
+-- Tabla agents
 CREATE TABLE agents (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 4. Crear tabla tickets
+-- Tabla tickets
 CREATE TABLE tickets (
     id INT PRIMARY KEY AUTO_INCREMENT,
     client_id INT NOT NULL,
     agent_id INT NULL,
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
-    status ENUM('OPEN', 'IN_PROGRESS', 'RESOLVED') DEFAULT 'OPEN',
+    status VARCHAR(20) DEFAULT 'OPEN',
     resolution TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 5. Agregar foreign keys (sin ON DELETE CASCADE para simplificar)
-ALTER TABLE tickets 
-ADD FOREIGN KEY (client_id) REFERENCES clients(id);
+-- Agregar foreign keys
+ALTER TABLE tickets ADD FOREIGN KEY (client_id) REFERENCES clients(id);
+ALTER TABLE tickets ADD FOREIGN KEY (agent_id) REFERENCES agents(id);
 
-ALTER TABLE tickets 
-ADD FOREIGN KEY (agent_id) REFERENCES agents(id);
-
--- 6. Índices básicos para mejorar rendimiento
-CREATE INDEX idx_tickets_status ON tickets(status);
-CREATE INDEX idx_tickets_client ON tickets(client_id);
-CREATE INDEX idx_tickets_agent ON tickets(agent_id);
-CREATE INDEX idx_tickets_created ON tickets(created_at);
-
--- 7. Insertar datos de ejemplo (opcional)
+-- Datos de ejemplo
 INSERT INTO clients (name, email) VALUES
-('Juan Pérez', 'juan@example.com'),
-('María García', 'maria@example.com'),
-('Carlos López', 'carlos@example.com');
+('Cliente Uno', 'cliente1@example.com'),
+('Cliente Dos', 'cliente2@example.com'),
+('Cliente Tres', 'cliente3@example.com');
 
 INSERT INTO agents (name, email) VALUES
-('Ana Rodríguez', 'ana@example.com'),
-('Pedro Martínez', 'pedro@example.com'),
-('Laura Sánchez', 'laura@example.com');
+('Agente Uno', 'agente1@example.com'),
+('Agente Dos', 'agente2@example.com'),
+('Agente Tres', 'agente3@example.com');
+
+-- Tickets de ejemplo
+INSERT INTO tickets (client_id, agent_id, title, description, status) VALUES
+(1, 1, 'Problema con login', 'No puedo iniciar sesión en la plataforma', 'OPEN'),
+(2, 2, 'Error en factura', 'La factura tiene un monto incorrecto', 'IN_PROGRESS'),
+(3, 3, 'Solicitud de función', 'Necesito exportar reportes a PDF', 'RESOLVED');
+
+-- Mostrar datos insertados
+SELECT '=== CLIENTES ===' as '';
+SELECT * FROM clients;
+
+SELECT '=== AGENTES ===' as '';
+SELECT * FROM agents;
+
+SELECT '=== TICKETS ===' as '';
+SELECT * FROM tickets;
