@@ -1,0 +1,206 @@
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Support Tickets</h1>
+        <button class="btn btn-primary" (click)="createTicket()">
+            <i class="bi bi-plus-circle me-1"></i> New Ticket
+        </button>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="card-title mb-3">Filters</h6>
+            <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+                <div class="row g-3">
+                    <!-- Status Filter -->
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" formControlName="status">
+                            <option *ngFor="let option of statusOptions" [value]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Client Filter -->
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">Client</label>
+                        <select class="form-select" formControlName="clientId">
+                            <option value="">All Clients</option>
+                            <option *ngFor="let client of clients" [value]="client.id">
+                                {{ client.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Agent Filter -->
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">Agent</label>
+                        <select class="form-select" formControlName="agentId">
+                            <option value="">All Agents</option>
+                            <option *ngFor="let agent of agents" [value]="agent.id">
+                                {{ agent.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">Date Range</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" formControlName="from" placeholder="From">
+                            <span class="input-group-text">to</span>
+                            <input type="date" class="form-control" formControlName="to" placeholder="To">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Actions -->
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
+                        <i class="bi bi-x-circle me-1"></i> Clear
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-filter me-1"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tickets Card -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Error Message (solo se muestra si hay error) -->
+            <app-error-message [message]="errorMessage" [title]="'Error'" [dismissible]="true">
+            </app-error-message>
+
+            <!-- Loading Spinner -->
+            <app-loading-spinner [loading]="isLoading" message="Loading tickets...">
+            </app-loading-spinner>
+
+            <!-- Tickets Table (solo se muestra si no está cargando y hay tickets) -->
+            <div class="table-responsive" *ngIf="!isLoading && tickets.length > 0">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="80">ID</th>
+                            <th>Title</th>
+                            <th>Client</th>
+                            <th>Agent</th>
+                            <th width="120">Status</th>
+                            <th width="150">Created</th>
+                            <th width="100">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ticket of tickets" class="cursor-pointer hover-row"
+                            (click)="viewTicket(ticket.id)">
+                            <td class="fw-semibold">#{{ ticket.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="bi bi-ticket text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ ticket.title }}</div>
+                                        <small class="text-muted text-truncate d-block" style="max-width: 300px;">
+                                            {{ ticket.description }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle-small me-2">
+                                        {{ ticket.client_name?.charAt(0) || '?' }}
+                                    </div>
+                                    <div>
+                                        <div class="small fw-medium">{{ ticket.client_name || 'Unknown Client' }}</div>
+                                        <small class="text-muted">{{ ticket.client_email || '' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div *ngIf="ticket.agent_name; else noAgent">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-small me-2 bg-warning">
+                                            {{ ticket.agent_name?.charAt(0) }}
+                                        </div>
+                                        <div>
+                                            <div class="small fw-medium">{{ ticket.agent_name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ng-template #noAgent>
+                                    <span class="text-muted small">Unassigned</span>
+                                </ng-template>
+                            </td>
+                            <td>
+                                <span [class]="getStatusClass(ticket.status)" class="status-badge">
+                                    {{ getStatusLabel(ticket.status) }}
+                                </span>
+                            </td>
+                            <td class="text-muted">
+                                <small>{{ ticket.created_at | date:'shortDate' }}</small>
+                                <br>
+                                <small>{{ ticket.created_at | date:'shortTime' }}</small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                    (click)="viewTicket(ticket.id); $event.stopPropagation()">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State (solo se muestra si no está cargando y no hay tickets) -->
+            <div class="text-center py-5" *ngIf="!isLoading && tickets.length === 0">
+                <div class="empty-state">
+                    <i class="bi bi-ticket-detailed display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted mb-2">No tickets found</h5>
+                    <p class="text-muted mb-4" *ngIf="hasActiveFilters()">
+                        Try changing your filters or
+                        <a href="javascript:void(0)" (click)="clearFilters()" class="text-primary">clear all filters</a>
+                    </p>
+                    <p class="text-muted mb-4" *ngIf="!hasActiveFilters()">
+                        Get started by creating your first ticket
+                    </p>
+                    <button class="btn btn-primary" (click)="createTicket()">
+                        <i class="bi bi-plus-circle me-1"></i> Create Ticket
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pagination (solo se muestra si no está cargando y hay tickets) -->
+            <div class="d-flex justify-content-between align-items-center mt-4"
+                *ngIf="!isLoading && tickets.length > 0">
+                <div class="text-muted">
+                    {{ getPaginationText() }}
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="onPageChange(currentPage - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" *ngFor="let page of paginationArray"
+                            [class.active]="page === currentPage">
+                            <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages">
+                            <a class="page-link" (click)="onPageChange(currentPage + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>

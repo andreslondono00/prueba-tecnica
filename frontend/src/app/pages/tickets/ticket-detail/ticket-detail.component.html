@@ -1,0 +1,176 @@
+<div class="container mt-4" *ngIf="ticket">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <h1 class="h3 d-inline-block mb-0">Ticket #{{ ticket.id }}</h1>
+        </div>
+        <div>
+            <span [class]="getStatusClass(ticket.status)" class="status-badge-large">
+                {{ statusLabels[ticket.status] }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <app-loading-spinner [loading]="isLoading" message="Loading ticket..."></app-loading-spinner>
+
+    <div class="row" *ngIf="!isLoading">
+        <!-- Ticket Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">{{ ticket.title }}</h4>
+                    <div class="ticket-description mb-4">
+                        <h6 class="text-muted mb-2">Description</h6>
+                        <p class="mb-0">{{ ticket.description }}</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <h6 class="text-muted mb-1">Client</h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle-small me-2">
+                                        {{ ticket.client_name?.charAt(0) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ ticket.client_name }}</div>
+                                        <small class="text-muted">{{ ticket.client_email }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <h6 class="text-muted mb-1">Agent</h6>
+                                <div *ngIf="ticket.agent_name; else noAgent">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-small me-2 bg-warning">
+                                            {{ ticket.agent_name?.charAt(0) }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-medium">{{ ticket.agent_name }}</div>
+                                            <small class="text-muted">{{ ticket.agent_email }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ng-template #noAgent>
+                                    <span class="text-muted small">Unassigned</span>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <h6 class="text-muted mb-1">Created</h6>
+                                <div>
+                                    <i class="bi bi-calendar me-1"></i>
+                                    {{ ticket.created_at | date:'medium' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <h6 class="text-muted mb-1">Last Updated</h6>
+                                <div>
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    {{ ticket.updated_at | date:'medium' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resolution Section -->
+                    <div class="resolution-section" *ngIf="ticket.resolution">
+                        <h6 class="text-muted mb-2">Resolution</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <p class="mb-0">{{ ticket.resolution }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status Update Card -->
+            <div class="card shadow-sm mb-4" *ngIf="canChangeStatus()">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Update Status</h6>
+                    <form [formGroup]="statusForm" (ngSubmit)="updateStatus()">
+                        <div class="mb-3">
+                            <label class="form-label">New Status</label>
+                            <select class="form-select" formControlName="status">
+                                <option *ngFor="let status of statusOptions" [value]="status">
+                                    {{ statusLabels[status] }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" *ngIf="showResolutionField()">
+                            <label class="form-label">Resolution *</label>
+                            <textarea class="form-control" formControlName="resolution" rows="4"
+                                placeholder="Describe how the issue was resolved..."
+                                [class.is-invalid]="statusForm.get('resolution')?.invalid && statusForm.get('resolution')?.touched"></textarea>
+                            <div class="invalid-feedback"
+                                *ngIf="statusForm.get('resolution')?.invalid && statusForm.get('resolution')?.touched">
+                                Resolution is required when resolving a ticket
+                            </div>
+                            <small class="form-text text-muted">
+                                Provide details about how the issue was resolved
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100"
+                            [disabled]="statusForm.invalid || isUpdating">
+                            <span *ngIf="!isUpdating">Update Status</span>
+                            <span *ngIf="isUpdating">
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                Updating...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Assign Agent Card -->
+            <div class="card shadow-sm" *ngIf="ticket.status !== 'RESOLVED'">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Assign Agent</h6>
+                    <form [formGroup]="assignForm" (ngSubmit)="assignAgent()">
+                        <div class="mb-3">
+                            <label class="form-label">Select Agent</label>
+                            <select class="form-select" formControlName="agentId">
+                                <option value="">Choose an agent...</option>
+                                <option *ngFor="let agent of agents" [value]="agent.id">
+                                    {{ agent.name }} ({{ agent.email }})
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Assign this ticket to an available agent
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100"
+                            [disabled]="assignForm.invalid || isUpdating">
+                            <span *ngIf="!isUpdating">
+                                <i class="bi bi-person-check me-1"></i> Assign Agent
+                            </span>
+                            <span *ngIf="isUpdating">
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                Assigning...
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

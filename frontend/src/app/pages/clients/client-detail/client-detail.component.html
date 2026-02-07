@@ -1,0 +1,151 @@
+<div class="container mt-4" *ngIf="client">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <h1 class="h3 d-inline-block mb-0">Client Details</h1>
+        </div>
+        <div>
+            <button class="btn btn-primary" (click)="createTicket()" *ngIf="!isEditing">
+                <i class="bi bi-plus-circle me-1"></i> Create Ticket
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <app-loading-spinner [loading]="isLoading" message="Loading client..."></app-loading-spinner>
+
+    <div class="row" *ngIf="!isLoading">
+        <!-- Client Information Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle-large me-3">
+                                {{ client.name.charAt(0) }}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ client.name }}</h5>
+                                <small class="text-muted">Client #{{ client.id }}</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary"
+                            (click)="isEditing ? cancelEdit() : startEdit()" *ngIf="!isSaving">
+                            <i class="bi" [class.bi-pencil]="!isEditing" [class.bi-x]="isEditing"></i>
+                            {{ isEditing ? 'Cancel' : 'Edit' }}
+                        </button>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <form [formGroup]="clientForm" *ngIf="isEditing" (ngSubmit)="saveClient()">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" formControlName="name"
+                                [class.is-invalid]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+                            <div class="invalid-feedback"
+                                *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+                                Name is required and must be at least 2 characters
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" formControlName="email"
+                                [class.is-invalid]="clientForm.get('email')?.invalid && clientForm.get('email')?.touched">
+                            <div class="invalid-feedback"
+                                *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched">
+                                Please enter a valid email address
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" [disabled]="clientForm.invalid || isSaving">
+                                <span *ngIf="!isSaving">Save Changes</span>
+                                <span *ngIf="isSaving">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    Saving...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- View Mode -->
+                    <div *ngIf="!isEditing">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Email</label>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-envelope me-2 text-muted"></i>
+                                <span>{{ client.email }}</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Created</label>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar me-2 text-muted"></i>
+                                <span>{{ client.created_at | date:'medium' }}</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Last Updated</label>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock-history me-2 text-muted"></i>
+                                <span>{{ client.updated_at | date:'medium' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Section -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Client Tickets</h5>
+                        <span class="badge bg-primary">{{ tickets.length }} tickets</span>
+                    </div>
+
+                    <!-- Tickets List -->
+                    <div class="list-group" *ngIf="tickets.length > 0">
+                        <div class="list-group-item border-0 p-3 hover-card mb-2 cursor-pointer"
+                            *ngFor="let ticket of tickets" (click)="viewTicket(ticket.id)">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span [class]="getTicketStatusClass(ticket.status)" class="me-2">
+                                            {{ getTicketStatusLabel(ticket.status) }}
+                                        </span>
+                                        <small class="text-muted">
+                                            #{{ ticket.id }} • {{ ticket.created_at | date:'short' }}
+                                        </small>
+                                    </div>
+                                    <h6 class="mb-1">{{ ticket.title }}</h6>
+                                    <p class="text-muted mb-0 text-truncate-2">
+                                        {{ ticket.description }}
+                                    </p>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty Tickets State -->
+                    <div class="text-center py-5" *ngIf="tickets.length === 0">
+                        <div class="empty-state">
+                            <i class="bi bi-ticket display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-2">No tickets yet</h5>
+                            <p class="text-muted mb-4">This client hasn't created any tickets</p>
+                            <button class="btn btn-primary" (click)="createTicket()">
+                                <i class="bi bi-plus-circle me-1"></i> Create First Ticket
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

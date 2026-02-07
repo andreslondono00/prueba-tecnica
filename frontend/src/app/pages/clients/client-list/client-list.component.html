@@ -1,0 +1,121 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Clients</h1>
+        <button class="btn btn-primary" (click)="createClient()">
+            <i class="bi bi-plus-circle me-1"></i> New Client
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Search Bar -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" [(ngModel)]="searchTerm"
+                            placeholder="Search by name or email..." (keyup.enter)="searchClients()">
+                        <button class="btn btn-outline-primary" type="button" (click)="searchClients()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" (click)="searchTerm = ''; loadClients()"
+                            *ngIf="searchTerm">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <app-error-message [message]="errorMessage" [title]="'Error'" [dismissible]="true">
+            </app-error-message>
+
+            <!-- Loading -->
+            <app-loading-spinner [loading]="isLoading" message="Loading clients...">
+            </app-loading-spinner>
+
+            <!-- Clients Table -->
+            <div class="table-responsive" *ngIf="!isLoading && clients.length > 0">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="80">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th width="200">Created Date</th>
+                            <th width="120">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let client of clients" class="cursor-pointer hover-row"
+                            (click)="viewClient(client.id)">
+                            <td class="fw-semibold">#{{ client.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3">
+                                        {{ client.name.charAt(0) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ client.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 200px;">
+                                    <i class="bi bi-envelope me-1 text-muted"></i>
+                                    {{ client.email }}
+                                </div>
+                            </td>
+                            <td class="text-muted">
+                                <small>{{ client.created_at | date:'mediumDate' }}</small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                    (click)="viewClient(client.id); $event.stopPropagation()">
+                                    <i class="bi bi-eye me-1"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div class="text-center py-5" *ngIf="!isLoading && clients.length === 0">
+                <div class="empty-state">
+                    <i class="bi bi-people display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted mb-2">No clients found</h5>
+                    <p class="text-muted mb-4">Get started by creating your first client</p>
+                    <button class="btn btn-primary" (click)="createClient()">
+                        <i class="bi bi-plus-circle me-1"></i> Create Client
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-4"
+                *ngIf="!isLoading && clients.length > 0">
+                <div class="text-muted">
+                    {{ getPaginationText() }}
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="onPageChange(currentPage - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" *ngFor="let page of paginationArray"
+                            [class.active]="page === currentPage">
+                            <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages">
+                            <a class="page-link" (click)="onPageChange(currentPage + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,180 @@
+<div class="container mt-4" *ngIf="agent">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <h1 class="h3 d-inline-block mb-0">Agent Details</h1>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary" (click)="isEditing ? cancelEdit() : startEdit()"
+                *ngIf="!isSaving && !isEditing">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <app-loading-spinner [loading]="isLoading" message="Loading agent..."></app-loading-spinner>
+
+    <div class="row" *ngIf="!isLoading">
+        <!-- Agent Information Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="agent-avatar-large me-3">
+                                {{ agent.name.charAt(0) }}
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{ agent.name }}</h5>
+                                <small class="text-muted">Agent #{{ agent.id }}</small>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary">Agent</span>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <form [formGroup]="agentForm" *ngIf="isEditing" (ngSubmit)="saveAgent()">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" formControlName="name"
+                                [class.is-invalid]="agentForm.get('name')?.invalid && agentForm.get('name')?.touched">
+                            <div class="invalid-feedback"
+                                *ngIf="agentForm.get('name')?.invalid && agentForm.get('name')?.touched">
+                                Name is required and must be at least 2 characters
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" formControlName="email"
+                                [class.is-invalid]="agentForm.get('email')?.invalid && agentForm.get('email')?.touched">
+                            <div class="invalid-feedback"
+                                *ngIf="agentForm.get('email')?.invalid && agentForm.get('email')?.touched">
+                                Please enter a valid email address
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" [disabled]="agentForm.invalid || isSaving">
+                                <span *ngIf="!isSaving">Save Changes</span>
+                                <span *ngIf="isSaving">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    Saving...
+                                </span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()"
+                                [disabled]="isSaving">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- View Mode -->
+                    <div *ngIf="!isEditing">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Email</label>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-envelope me-2 text-muted"></i>
+                                <span>{{ agent.email }}</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small mb-1">Created</label>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar me-2 text-muted"></i>
+                                <span>{{ agent.created_at | date:'medium' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Stats Card -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Performance Stats</h6>
+
+                    <div class="stats-grid">
+                        <div class="stat-item text-center">
+                            <div class="stat-value text-primary">{{ agent.tickets_in_progress || 0 }}</div>
+                            <div class="stat-label">In Progress</div>
+                        </div>
+                        <div class="stat-item text-center">
+                            <div class="stat-value text-success">{{ agent.tickets_resolved || 0 }}</div>
+                            <div class="stat-label">Resolved</div>
+                        </div>
+                        <div class="stat-item text-center">
+                            <div class="stat-value">{{ agent.total_tickets || 0 }}</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small text-muted">Resolution Rate</span>
+                            <span class="small fw-medium">{{ getResolutionRate() }}%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" [style.width.%]="getResolutionRate()"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Section -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title mb-0">Assigned Tickets</h5>
+                        <span class="badge bg-primary">{{ tickets.length }} tickets</span>
+                    </div>
+
+                    <!-- Tickets List -->
+                    <div class="list-group" *ngIf="tickets.length > 0">
+                        <div class="list-group-item border-0 p-3 hover-card mb-2 cursor-pointer"
+                            *ngFor="let ticket of tickets" (click)="viewTicket(ticket.id)">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span [class]="getTicketStatusClass(ticket.status)" class="me-2">
+                                            {{ getTicketStatusLabel(ticket.status) }}
+                                        </span>
+                                        <small class="text-muted">
+                                            #{{ ticket.id }} • {{ ticket.created_at | date:'short' }}
+                                        </small>
+                                    </div>
+                                    <h6 class="mb-1">{{ ticket.title }}</h6>
+                                    <p class="text-muted mb-0 text-truncate-2">
+                                        {{ ticket.description }}
+                                    </p>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-person me-1"></i>
+                                            Client: {{ ticket.client_name }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty Tickets State -->
+                    <div class="text-center py-5" *ngIf="tickets.length === 0">
+                        <div class="empty-state">
+                            <i class="bi bi-ticket display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-2">No tickets assigned</h5>
+                            <p class="text-muted mb-4">This agent hasn't been assigned any tickets yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

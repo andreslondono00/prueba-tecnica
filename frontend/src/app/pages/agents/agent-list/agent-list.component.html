@@ -1,0 +1,134 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Agents</h1>
+        <button class="btn btn-primary" (click)="createAgent()">
+            <i class="bi bi-plus-circle me-1"></i> New Agent
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Search Bar -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" [(ngModel)]="searchTerm" placeholder="Search agents..."
+                            (keyup.enter)="searchAgents()">
+                        <button class="btn btn-outline-primary" type="button" (click)="searchAgents()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" (click)="searchTerm = ''; loadAgents()"
+                            *ngIf="searchTerm">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <app-error-message [message]="errorMessage" [title]="'Error'" [dismissible]="true">
+            </app-error-message>
+
+            <!-- Loading -->
+            <app-loading-spinner [loading]="isLoading" message="Loading agents..."></app-loading-spinner>
+
+            <!-- Agents Grid -->
+            <div class="row g-4" *ngIf="!isLoading && agents.length > 0">
+                <div class="col-md-6 col-lg-4" *ngFor="let agent of agents">
+                    <div class="card agent-card h-100 cursor-pointer" (click)="viewAgent(agent.id)">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="agent-avatar me-3">
+                                    {{ agent.name.charAt(0) }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">{{ agent.name }}</h5>
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        {{ agent.email }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Agent Metrics -->
+                            <div class="row text-center g-2 mb-3">
+                                <div class="col-4">
+                                    <div class="metric-card">
+                                        <div class="metric-value text-primary">{{ agent.tickets_in_progress || 0 }}
+                                        </div>
+                                        <div class="metric-label">In Progress</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="metric-card">
+                                        <div class="metric-value text-success">{{ agent.tickets_resolved || 0 }}</div>
+                                        <div class="metric-label">Resolved</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="metric-card">
+                                        <div class="metric-value">{{ agent.total_tickets || 0 }}</div>
+                                        <div class="metric-label">Total</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resolution Rate -->
+                            <div class="progress mb-2" style="height: 6px;">
+                                <div class="progress-bar bg-success" [style.width.%]="getResolutionRate(agent)"></div>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Resolution Rate</span>
+                                <span class="fw-medium">{{ getResolutionRate(agent) }}%</span>
+                            </div>
+
+                            <!-- Action Button -->
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm w-100"
+                                    (click)="viewAgent(agent.id); $event.stopPropagation()">
+                                    <i class="bi bi-eye me-1"></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="text-center py-5" *ngIf="!isLoading && agents.length === 0">
+                <div class="empty-state">
+                    <i class="bi bi-person-badge display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted mb-2">No agents found</h5>
+                    <p class="text-muted mb-4">Get started by creating your first agent</p>
+                    <button class="btn btn-primary" (click)="createAgent()">
+                        <i class="bi bi-plus-circle me-1"></i> Create Agent
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="!isLoading && agents.length > 0">
+                <div class="text-muted">
+                    {{ getPaginationText() }}
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="onPageChange(currentPage - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" *ngFor="let page of paginationArray"
+                            [class.active]="page === currentPage">
+                            <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages">
+                            <a class="page-link" (click)="onPageChange(currentPage + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>

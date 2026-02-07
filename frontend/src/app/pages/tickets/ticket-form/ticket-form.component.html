@@ -1,0 +1,101 @@
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <button class="btn btn-outline-secondary me-2" (click)="cancel()">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <h1 class="h3 d-inline-block mb-0">Create New Ticket</h1>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        Create a new support ticket for a client. Fill in all required fields below.
+                    </p>
+
+                    <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+                        <!-- Client Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Client *</label>
+                            <div *ngIf="loadingClients" class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                                <span class="text-muted">Loading clients...</span>
+                            </div>
+                            <select class="form-select" formControlName="clientId"
+                                [class.is-invalid]="clientId?.invalid && (clientId?.touched || clientId?.dirty)"
+                                *ngIf="!loadingClients">
+                                <option value="">Select a client...</option>
+                                <option *ngFor="let client of clients" [value]="client.id">
+                                    {{ client.name }} ({{ client.email }})
+                                </option>
+                            </select>
+                            <div class="invalid-feedback" *ngIf="clientId?.errors?.['required']">
+                                Please select a client
+                            </div>
+                            <small class="form-text text-muted">
+                                Select the client who is reporting this issue
+                            </small>
+                        </div>
+
+                        <!-- Title Field -->
+                        <div class="mb-4">
+                            <label class="form-label">Title *</label>
+                            <input type="text" class="form-control" formControlName="title"
+                                placeholder="Enter a brief title for the issue"
+                                [class.is-invalid]="title?.invalid && (title?.touched || title?.dirty)">
+                            <div class="invalid-feedback" *ngIf="title?.errors?.['required']">
+                                Title is required
+                            </div>
+                            <div class="invalid-feedback" *ngIf="title?.errors?.['minlength']">
+                                Title must be at least 5 characters long
+                            </div>
+                            <small class="form-text text-muted">
+                                Provide a concise title that summarizes the issue
+                            </small>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-4">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-control" formControlName="description" rows="5"
+                                placeholder="Describe the issue in detail..."
+                                [class.is-invalid]="description?.invalid && (description?.touched || description?.dirty)"></textarea>
+                            <div class="invalid-feedback" *ngIf="description?.errors?.['required']">
+                                Description is required
+                            </div>
+                            <div class="invalid-feedback" *ngIf="description?.errors?.['minlength']">
+                                Description must be at least 10 characters long
+                            </div>
+                            <small class="form-text text-muted">
+                                Provide detailed information about the issue, including steps to reproduce if possible
+                            </small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" (click)="cancel()"
+                                [disabled]="isLoading">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary" [disabled]="ticketForm.invalid || isLoading">
+                                <span *ngIf="!isLoading">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Create Ticket
+                                </span>
+                                <span *ngIf="isLoading">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    Creating...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
