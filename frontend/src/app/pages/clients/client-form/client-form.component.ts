@@ -1,14 +1,17 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ClientsService } from '../../../core/services/clients.service';
 import { CreateClientRequest } from '../../../core/models/client.model';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-client-form',
     templateUrl: './client-form.component.html',
-    styleUrls: ['./client-form.component.css']
+    styleUrls: ['./client-form.component.css'],
+    standalone: true,
+    imports: [ReactiveFormsModule, CommonModule]
 })
 export class ClientFormComponent {
     clientForm: FormGroup;
@@ -65,4 +68,5 @@ export class ClientFormComponent {
 
     get name() { return this.clientForm.get('name'); }
     get email() { return this.clientForm.get('email'); }
+
 }

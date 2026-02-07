@@ -1,0 +1,10 @@
+<div class="alert alert-danger alert-dismissible fade show" role="alert" *ngIf="message">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>
+            <strong *ngIf="title">{{ title }}</strong>
+            <div>{{ message }}</div>
+        </div>
+    </div>
+    <button type="button" class="btn-close" (click)="onDismiss()" *ngIf="dismissible" aria-label="Close"></button>
+</div>

@@ -1,16 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClientsService } from '../../../core/services/clients.service';
 import { TicketsService } from '../../../core/services/tickets.service';
 import { Client, UpdateClientRequest } from '../../../core/models/client.model';
 import { Ticket } from '../../../core/models/ticket.model';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../../../components/shared/error-message/error-message.component';
 
 @Component({
     selector: 'app-client-detail',
     templateUrl: './client-detail.component.html',
-    styleUrls: ['./client-detail.component.css']
+    styleUrls: ['./client-detail.component.css'],
+    standalone: true,
+    imports: [ReactiveFormsModule, CommonModule, LoadingSpinnerComponent]
 })
 export class ClientDetailComponent implements OnInit {
     client: Client | null = null;
@@ -108,6 +113,26 @@ export class ClientDetailComponent implements OnInit {
                 this.isSaving = false;
             }
         });
+    }
+
+    deleteClient() {
+        if (!this.client) return;
+
+        const confirmed = window.confirm('¿Seguro que deseas eliminar este ticket?');
+        if (confirmed) {
+            this.clientsService.deleteClient(this.client.id).subscribe({
+                next: () => {
+                    this.goBack();
+                },
+                error: (error) => {
+                    this.toastr.error('Failed to delete client');
+                    console.error(error);
+                },
+                complete: () => {
+                    this.isSaving = false;
+                }
+            });
+        }
     }
 
     viewTicket(ticketId: number): void {

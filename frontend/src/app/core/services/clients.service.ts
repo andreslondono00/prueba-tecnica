@@ -8,6 +8,7 @@ import {
     CreateClientRequest,
     UpdateClientRequest
 } from '../models/client.model';
+import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 
 @Injectable({
     providedIn: 'root'
@@ -31,6 +32,10 @@ export class ClientsService {
 
     updateClient(id: number, data: UpdateClientRequest): Observable<ClientResponse> {
         return this.api.put<ClientResponse>(`${this.endpoint}/${id}`, data);
+    }
+
+    deleteClient(id: number): Observable<ClientResponse> {
+        return this.api.delete<ClientResponse>(`${this.endpoint}/${id}`);
     }
 
     searchClients(query: string): Observable<ClientsResponse> {

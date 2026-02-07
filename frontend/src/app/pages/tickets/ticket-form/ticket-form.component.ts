@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TicketsService } from '../../../core/services/tickets.service';
 import { ClientsService } from '../../../core/services/clients.service';
 import { CreateTicketRequest } from '../../../core/models/ticket.model';
 import { Client } from '../../../core/models/client.model';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-ticket-form',
     templateUrl: './ticket-form.component.html',
-    styleUrls: ['./ticket-form.component.css']
+    styleUrls: ['./ticket-form.component.css'],
+    standalone: true,
+    imports: [ReactiveFormsModule, CommonModule]
 })
 export class TicketFormComponent implements OnInit {
     ticketForm: FormGroup;

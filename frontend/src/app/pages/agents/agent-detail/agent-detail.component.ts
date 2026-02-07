@@ -1,16 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AgentsService } from '../../../core/services/agents.service';
 import { TicketsService } from '../../../core/services/tickets.service';
 import { Agent, UpdateAgentRequest } from '../../../core/models/agent.model';
 import { Ticket } from '../../../core/models/ticket.model';
 import { ToastrService } from 'ngx-toastr';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-agent-detail',
     templateUrl: './agent-detail.component.html',
-    styleUrls: ['./agent-detail.component.css']
+    styleUrls: ['./agent-detail.component.css'],
+    standalone: true,
+    imports: [LoadingSpinnerComponent, CommonModule, ReactiveFormsModule]
 })
 export class AgentDetailComponent implements OnInit {
     agent: Agent | null = null;

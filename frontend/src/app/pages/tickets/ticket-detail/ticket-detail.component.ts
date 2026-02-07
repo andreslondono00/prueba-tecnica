@@ -1,16 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TicketsService } from '../../../core/services/tickets.service';
 import { AgentsService } from '../../../core/services/agents.service';
 import { Ticket, TicketStatus } from '../../../core/models/ticket.model';
 import { Agent } from '../../../core/models/agent.model';
 import { ToastrService } from 'ngx-toastr';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-ticket-detail',
     templateUrl: './ticket-detail.component.html',
-    styleUrls: ['./ticket-detail.component.css']
+    styleUrls: ['./ticket-detail.component.css'],
+    standalone: true,
+    imports: [ReactiveFormsModule, LoadingSpinnerComponent, CommonModule]
 })
 export class TicketDetailComponent implements OnInit {
     ticket: Ticket | null = null;

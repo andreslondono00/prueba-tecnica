@@ -3,11 +3,17 @@ import { Router } from '@angular/router';
 import { ClientsService } from '../../../core/services/clients.service';
 import { Client } from '../../../core/models/client.model';
 import { ToastrService } from 'ngx-toastr';
+import { ErrorMessageComponent } from '../../../components/shared/error-message/error-message.component';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-client-list',
     templateUrl: './client-list.component.html',
-    styleUrls: ['./client-list.component.css']
+    styleUrls: ['./client-list.component.css'],
+    standalone: true,
+    imports: [ErrorMessageComponent, LoadingSpinnerComponent, CommonModule, FormsModule]
 })
 export class ClientListComponent implements OnInit {
     clients: Client[] = [];

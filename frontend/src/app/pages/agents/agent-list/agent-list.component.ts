@@ -3,11 +3,17 @@ import { Router } from '@angular/router';
 import { AgentsService } from '../../../core/services/agents.service';
 import { Agent } from '../../../core/models/agent.model';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { ErrorMessageComponent } from '../../../components/shared/error-message/error-message.component';
 
 @Component({
     selector: 'app-agent-list',
     templateUrl: './agent-list.component.html',
-    styleUrls: ['./agent-list.component.css']
+    styleUrls: ['./agent-list.component.css'],
+    standalone: true,
+    imports: [CommonModule, FormsModule, LoadingSpinnerComponent, ErrorMessageComponent]
 })
 export class AgentListComponent implements OnInit {
     agents: Agent[] = [];

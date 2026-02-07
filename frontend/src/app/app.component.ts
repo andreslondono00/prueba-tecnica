@@ -6,17 +6,7 @@ import { HeaderComponent } from './components/layout/header/header.component';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, HeaderComponent],
-  template: `
-    <app-header></app-header>
-    <main class="py-4">
-      <router-outlet></router-outlet>
-    </main>
-  `,
-  styles: [`
-    main {
-      min-height: calc(100vh - 72px);
-      background-color: #f5f5f5;
-    }
-  `]
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent { }

@@ -49,7 +49,7 @@
                                 <div *ngIf="ticket.agent_name; else noAgent">
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-circle-small me-2 bg-warning">
-                                            {{ ticket.agent_name?.charAt(0) }}
+                                            {{ ticket.agent_name.charAt(0) }}
                                         </div>
                                         <div>
                                             <div class="fw-medium">{{ ticket.agent_name }}</div>

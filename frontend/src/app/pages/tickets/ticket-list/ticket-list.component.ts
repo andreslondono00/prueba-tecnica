@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TicketsService } from '../../../core/services/tickets.service';
 import { ClientsService } from '../../../core/services/clients.service';
@@ -8,11 +8,16 @@ import { Ticket, TicketStatus, TicketFilters } from '../../../core/models/ticket
 import { Client } from '../../../core/models/client.model';
 import { Agent } from '../../../core/models/agent.model';
 import { ToastrService } from 'ngx-toastr';
+import { ErrorMessageComponent } from '../../../components/shared/error-message/error-message.component';
+import { LoadingSpinnerComponent } from '../../../components/shared/loading-spinner/loading-spinner.component';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-ticket-list',
     templateUrl: './ticket-list.component.html',
-    styleUrls: ['./ticket-list.component.css']
+    styleUrls: ['./ticket-list.component.css'],
+    imports: [ErrorMessageComponent, LoadingSpinnerComponent, DatePipe, ReactiveFormsModule, CommonModule],
+    standalone: true
 })
 export class TicketListComponent implements OnInit {
     // Propiedades principales
